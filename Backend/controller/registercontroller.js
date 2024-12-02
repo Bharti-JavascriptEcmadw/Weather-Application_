@@ -46,7 +46,7 @@
    .cookie("token", token, options)
    .send({
       success:true,
-      message:'User registered Successfully',
+      // message:'User registered Successfully',
       user,
       token,
    
@@ -103,7 +103,7 @@
             res.status(200).cookie("token",token,options)
             .json({
             success:true,
-            message:'Login Successfully',
+            // message:'Login Successfully',
             user,
             token
             })}
