@@ -1,149 +1,134 @@
+import userModel from "../models/userModel.js";
 
-   import userModel from "../models/userModel.js"
+export const registercontroller = async (req, res, next) => {
+   try {
 
+      // const { name, email, password } = req.body;
+  const { email, name, password, phone}= req.body;
+  console.log(name);
+   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-   export const registercontroller =async(req,res, next)=>{
-   try{
-   const {name, email, password}=req.body;
-   if(!name){
-      next('name is required')
-      return res.status(400).send({success:false,message:`please provide name`})
-   }
-   if(!email){
-      next('emial is require');
-      return res.status(400).send({success:false,message:`please provide email`})
-   }
-   if(!password){
-   next('password is require');
-
-      return res.status(400).send({success:false,message:`please provide password`})
-   }
- 
-
-   const existinguser=await userModel.findOne({email})
-   if(existinguser){
-   next("already register please login");
-   return res.status(200).send({
-         success:false,
-         message:'Email is already register please Login'
-      });
-   };
-   //!!if all the condition are false then save the register detail 
-
-   const user =await userModel.create({name,email,password })
-
-   // ?? create jwt token and save in user model 
-   const token=user.createJWT()
-   const options={
-      expires:new Date(
-            Date.now()+process.env.Cookie_Expire*24*60*60*1000
-      ),
-      httpOnly:true,
-   };
-
-   // const token= sendToken()
-   res.status(201)
-   .cookie("token", token, options)
-   .send({
-      success:true,
-      // message:'User registered Successfully',
-      user,
-      token,
-   
-   })
+      // Validation
+      if (!name) {
+         return res.status(400).send({ success: false, message: 'Please provide name' });
       }
-      catch(err){
-         //   console.log(err)
-         // res.status(400).send({
-               // message:'Error in register controller',
-               // success:false,
-               // err
-         next(`Please provide all the details`);
-         }
+      if (!email) {
+         return res.status(400).send({ success: false, message: 'Please provide email' });
+      }
+      if (!password) {
+         return res.status(400).send({ success: false, message: 'Please provide password' });
+      }
+      if (!phone ){
+         return res.status(400).send ({sucess:false, message: 'Please provide phone'})
+      }
+      // Check if user already exists
+      const existinguser = await userModel.findOne({ email });
+      if (existinguser) {
+         return res.status(400).send({
+            success: false,
+            message: 'Email is already registered. Please login'
+         });
+      }
 
+      // Create new user
+      const user = await userModel.create({ name, email, password, phone });
+
+      // Create JWT token
+      const token = user.createJWT();
+      const options = {
+         expires: new Date(Date.now() + process.env.Cookie_Expire * 24 * 60 * 60 * 1000),
+         httpOnly: true,
       };
 
+      // Send response with token
+      res.status(201)
+         .cookie("token", token, options)
+         .send({
+            success: true,
+            user,
+            token,
+         });
+   } catch (err) {
+      // Handle any other errors
+      console.error(err);
+      next(new Error('Error in registration process.'));
+   }
+};
 
 
+export const loginController = async (req, res, next) => {
+   try {
+      const { email, password } = req.body;
 
+      // Validation
+      if (!email || !password) {
+         return res.status(400).send({ success: false, message: 'Please provide both email and password.' });
+      }
 
-      //!!Login credintial 
+      // Find user by email
+      const user = await userModel.findOne({ email });
+      if (!user) {
+         return res.status(401).send({ success: false, message: 'Invalid username or password.' });
+      }
 
+      // Check password match
+      const isPasswordMatch = await user.comparePassword(password);
+      if (!isPasswordMatch) {
+         return res.status(401).send({ success: false, message: 'Invalid username or password.' });
+      }
 
-      const loginController = async(req,res,next)=>{
-         try{
+      // Remove password from response
+      user.password = undefined;
 
-         const {email,password}=req.body;
+      // Create JWT token
+      const token = user.createJWT();
+      const options = {
+         expires: new Date(Date.now() + process.env.Cookie_Expire * 24 * 60 * 60 * 1000),
+         httpOnly: true,
+      };
 
-         //??validation
-
-         if(!email||!password ){
-            next('please provide all field').select("+password")}
-          
-         const user=await userModel.findOne({email})
-            if(!user){
-               next("invalid user name or password")}
-               
-            const isPasswordMatch=await user.comparePassword(password)
-            if(!isPasswordMatch){
-            next('invalid username or password ')
-            }
-          
-
-            user.password=undefined;
-
-            const token= user.createJWT()
-            const options={
-               expires:new Date(
-                  Date.now()+process.env.Cookie_Expire*24*60*60*1000
-               ),
-               httpOnly:true,
-         };
-
-            res.status(200).cookie("token",token,options)
-            .json({
-            success:true,
-            // message:'Login Successfully',
+      // Send response with token
+      res.status(200).cookie("token", token, options)
+         .json({
+            success: true,
             user,
             token
-            })}
-
-            catch(err){
-               next(`Please provide all the details`);}
-         };
-
-      
-
-
-   export {loginController};
-
-   // !! logout---------------------
-   
-
-   export const logoutController = async(req,res,next)=>{
-      // const token = req.cookies.Cookies;
-      // console.log(token)
-
-         res.status(201).cookie("token", " ", {
-            httpOnly:true,
-            expire:new Date(Date.now),
-         })
-         .json({
-            success :true, 
-            message:"user logout successfully"   });
-
-      
+         });
+   } catch (err) {
+      // Handle any other errors
+      console.error(err);
+      next(new Error('Error in login process.'));
    }
-
-   export const getUser= async(req,res,next)=>{
-     const user= req.user;
-     res.status(200)
-     .json({
-      success:true,
-      user,
-     });
-   };
+};
 
 
-
-   
+export const logoutController = async (req, res, next) => {
+   try {
+      // Clear token from cookies
+      res.status(200).cookie("token", "", {
+         httpOnly: true,
+         expires: new Date(Date.now()),
+      })
+         .json({
+            success: true,
+            message: 'User logged out successfully',
+         });
+   } catch (err) {
+      // Handle any other errors
+      console.error(err);
+      next(new Error('Error during logout.'));
+   }
+};
+export const getUser = async (req, res, next) => {
+   try {
+      const user = req.user;
+      res.status(200).json({
+         success: true,
+         user,
+      });
+   } catch (err) {
+      // Handle any other errors
+      console.error(err);
+      next(new Error('Error fetching user data.'));
+   }
+};

@@ -15,9 +15,7 @@ const auth = async (req, res, next) => {
     try {
         const payload = JWT.verify(token, process.env.JWT_SECRET);
         console.log(payload)
-        // req.user = { userID: payload.userID };user
-        // !! yaha userId islyea ayega kuki user model me jwt token create sign kyia 
-        // !! tab waha par humne user id ko userID variable me store kyia hai 
+
         req.user=await userModel.findById(payload.userID)
         console.log(`whole user console  ${req.user}`)
         
