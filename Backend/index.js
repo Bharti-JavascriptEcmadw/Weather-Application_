@@ -29,9 +29,14 @@ app.use(express.urlencoded({extended:true}))
 
 import registerroutes from './routes/registerroute.js'
 import weatherroutes from './routes/weatherroutes.js'; 
+// import userReportRoutes from './routes/userReportRoutes.js'; // Import the routes
 
 app.use('/api/v1/reg', registerroutes) 
 app.use('/api/v1', weatherroutes);  
+// app.use('/api/v1', userReportRoutes);
+
+
+
 
 
 

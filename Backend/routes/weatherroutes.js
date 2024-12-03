@@ -8,9 +8,9 @@ import { searchWeather, getWeatherReports} from '../controller/weatherController
 const router = express.Router();
 
 
-router.get('/weather/:city', searchWeather); // `/api/v1/weather/:city` route
+router.get('/weather/:city',auth, searchWeather); // `/api/v1/weather/:city` route
 
-router.get('/w/report',  getWeatherReports); // `/api/v1/weather/:city` route
+router.get('/w/report',auth,  getWeatherReports); // `/api/v1/weather/:city` route
 
   
 export default router;

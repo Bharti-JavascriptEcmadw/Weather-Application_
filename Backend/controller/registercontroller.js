@@ -1,9 +1,8 @@
 import userModel from "../models/userModel.js";
 
-export const registercontroller = async (req, res, next) => {
+export const registercontroller = async (req, res,) => {
    try {
 
-      // const { name, email, password } = req.body;
   const { email, name, password, phone}= req.body;
   console.log(name);
    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -49,14 +48,14 @@ export const registercontroller = async (req, res, next) => {
             token,
          });
    } catch (err) {
-      // Handle any other errors
+      
       console.error(err);
-      next(new Error('Error in registration process.'));
+      
    }
 };
 
 
-export const loginController = async (req, res, next) => {
+export const loginController = async (req, res,) => {
    try {
       const { email, password } = req.body;
 
@@ -77,8 +76,7 @@ export const loginController = async (req, res, next) => {
          return res.status(401).send({ success: false, message: 'Invalid username or password.' });
       }
 
-      // Remove password from response
-      user.password = undefined;
+   
 
       // Create JWT token
       const token = user.createJWT();
@@ -97,12 +95,12 @@ export const loginController = async (req, res, next) => {
    } catch (err) {
       // Handle any other errors
       console.error(err);
-      next(new Error('Error in login process.'));
+      // next(new Error('Error in login process.'));
    }
 };
 
 
-export const logoutController = async (req, res, next) => {
+export const logoutController = async (req, res,) => {
    try {
       // Clear token from cookies
       res.status(200).cookie("token", "", {
@@ -125,10 +123,11 @@ export const getUser = async (req, res, next) => {
       res.status(200).json({
          success: true,
          user,
+         
       });
    } catch (err) {
       // Handle any other errors
       console.error(err);
-      next(new Error('Error fetching user data.'));
+      // next(new Error('Error fetching user data.'));
    }
 };
